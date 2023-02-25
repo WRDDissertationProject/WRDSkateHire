@@ -1,32 +1,29 @@
 package com.example.willsrollerdiscosh;
 
-import javafx.collections.FXCollections;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class sceneSelector {
     @FXML
     Button homeButton, lockButton, unlockButton;
     private Stage stage;
-    private Scene scene;
+    private static Scene scene;
     private Parent root;
 
     @FXML
@@ -38,7 +35,7 @@ public class sceneSelector {
     @FXML
     public void switchToHome(ActionEvent event) throws IOException {
         root = FXMLLoader.load(getClass().getResource("home.fxml"));
-        stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
@@ -46,24 +43,47 @@ public class sceneSelector {
 
     public void switchToSkateHire(ActionEvent event) throws IOException {
         root = FXMLLoader.load(getClass().getResource("skateHire.fxml"));
-        stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
 
-        loadSkateHire();
+        SkateHireReloader();
     }
 
-    public static void recordExists(){
+    public static void checkForRecord(int count) {
+        Button skateHire = (Button) scene.lookup("#skateHireButton");
+        Button tickets = (Button) scene.lookup("#ticketsButton");
+        Button maintenance = (Button) scene.lookup("#maintenanceButton");
+
+        if (count > 0) {
+            System.out.println("Session Currently Running");
+
+            //skateHire.setDisable(false);
+            // tickets.setDisable(false);
+            // maintenance.setDisable(false);
+        } else {
+            System.out.println("Session Stopped");
+            //Label session = (Label) scene.lookup("#sessionStatus");
+            //session.setText("Session Stopped");
+
+            //skateHire.setDisable(true);
+            //tickets.setDisable(true);
+            //maintenance.setDisable(true);
+        }
+    }
+
+    public static void recordExists() {
         //Label session = (Label) scene.lookup("#sessionStatus");
         //session.setText("Session Currently Running");
         System.out.println("Session Currently Running");
     }
 
-    public static void recordDoesNotExist(){
+    public static void recordDoesNotExist() {
         //Label session = (Label) scene.lookup("#sessionStatus");
-        //session.setText("Session Stopped");
-        System.out.println("Session Stopped");
+
+        Button skateHire = (Button) scene.lookup("#skateHireButton");
+        skateHire.setDisable(true);
     }
 
     public void lockSkateHire(ActionEvent event) throws IOException {
@@ -80,16 +100,11 @@ public class sceneSelector {
         this.lockButton.setVisible(true);
     }
 
-    public void loadSkateHire() {
+    public void loadSkateHire() throws SQLException {
         //Testing Data
         //Eventually replace with fetch from database
 
-        ObservableList<Skate> data = FXCollections.observableArrayList(
-                new Skate("Size 1", 15),
-                new Skate("Size 2", 20),
-                new Skate("Size 3", 8),
-                new Skate("Size 4", 4)
-        );
+        ObservableList<Skate> data = DBConnect.loadSkates();
         // create table columns
         TableColumn<Skate, String> skateSizeCol = new TableColumn<>("Skate Size");
         skateSizeCol.setCellValueFactory(new PropertyValueFactory<>("skateSize"));
@@ -123,33 +138,50 @@ public class sceneSelector {
                     if (item.getSkateAmount() > 10) {
                         setStyle("-fx-background-color:#48992B;");
                         label.setTextFill(Color.web("BEBEBE"));
-                    } else if(item.getSkateAmount() <= 10 && item.getSkateAmount() > 5){
+                    } else if (item.getSkateAmount() <= 10 && item.getSkateAmount() > 5) {
                         setStyle("-fx-background-color: #F7AE2C;");
                         label.setTextFill(Color.web("2D2D2D"));
-                    } else if(item.getSkateAmount() <= 5){
+                    } else if (item.getSkateAmount() <= 5) {
                         setStyle("-fx-background-color: #FA3837;");
                         label.setTextFill(Color.web("BEBEBE"));
-                    }
-                    else {
+                    } else {
                         setStyle("");
                     }
                     button.setOnAction(event -> {
                         // increment skate amount for this row
-                        item.setSkateAmount(item.getSkateAmount() + 1);
-                        label.setText(item.getSkateSize() + " " + item.getSkateAmount());
-                        if (item.getSkateAmount() > 10) {
-                            setStyle("-fx-background-color:#48992B;");
-                            label.setTextFill(Color.web("BEBEBE"));
-                        } else if(item.getSkateAmount() <= 10 && item.getSkateAmount() > 5){
-                            setStyle("-fx-background-color: #F7AE2C;");
-                            label.setTextFill(Color.web("2D2D2D"));
-                        } else if(item.getSkateAmount() <= 5){
-                            setStyle("-fx-background-color: #FA3837;");
-                            label.setTextFill(Color.web("BEBEBE"));
+                        int currentValue = item.getSkateAmount();
+
+                        //if skates below max value replace
+                        if (currentValue >= 0) {
+
+                            int newValue = item.getSkateAmount() + 1 ;
+                            item.setSkateAmount(newValue);
+                            String skateSize = item.getSkateSize();
+                            try {
+                                DBConnect.updateSkateListPlus(newValue, skateSize);
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
+                            }
+
+                            if (item.getSkateAmount() > 0) {
+                                label.setText(item.getSkateSize() + " " + item.getSkateAmount());
+                                label.setText(item.getSkateSize() + " " + item.getSkateAmount());
+                            } else if (item.getSkateAmount() > 10) {
+                                setStyle("-fx-background-color:#48992B;");
+                                label.setTextFill(Color.web("BEBEBE"));
+
+                            } else if (item.getSkateAmount() <= 10 && item.getSkateAmount() > 5) {
+                                setStyle("-fx-background-color: #F7AE2C;");
+                                label.setTextFill(Color.web("2D2D2D"));
+
+                            } else if (item.getSkateAmount() <= 5) {
+                                setStyle("-fx-background-color: #FA3837;");
+                                label.setTextFill(Color.web("BEBEBE"));
+                            }
+                        } else {
+                            //errors.minusSkates();
                         }
-                        else {
-                            setStyle("");
-                        }
+
                     });
 
                 }
@@ -159,6 +191,23 @@ public class sceneSelector {
         listView.setItems(data);
     }
 
+    public void SkateHireReloader() {
+        Timer reloadSkateHire = new Timer();
+        reloadSkateHire.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> {
+                    try {
+                        loadSkateHire();
+                        System.out.println("Skate Hire Reload");
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+        }, 0, 800); // reload every second
+
+    }
 }
 
 
