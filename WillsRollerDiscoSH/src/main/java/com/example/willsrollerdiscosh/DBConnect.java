@@ -1,13 +1,11 @@
 package com.example.willsrollerdiscosh;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class DBConnect {
     String url = "jdbc:mysql://localhost:3306/wrdDatabase";
@@ -40,25 +38,26 @@ public class DBConnect {
 
     public void sessionStartChecker() throws SQLException {
         //System.out.println("test");
+
         Timer reloadSessionChecker = new Timer();
-        TimerTask task = new TimerTask() {
+        reloadSessionChecker.schedule(new TimerTask() {
             @Override
             public void run() {
-                Statement statement = null;
-                try {
-                    statement = connection.createStatement();
-                    ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM current_session");
-                    resultSet.next();
-                    int count = resultSet.getInt(1);
-                    boolean recordExists;
-                    sceneSelector.checkForRecord(count);
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
+                Platform.runLater(() -> {
+                    Statement statement = null;
+                    try {
+                        statement = connection.createStatement();
+                        ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM current_session");
+                        resultSet.next();
+                        int count = resultSet.getInt(1);
+                        boolean recordExists;
+                        sceneSelector.checkForRecord(count);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
-        };
-        reloadSessionChecker.schedule(task, 2000, 2000);
-
+        },2000,2000);
     }
 
     public static List<String> loadAnnouncement() throws SQLException {
@@ -101,6 +100,60 @@ public class DBConnect {
 
         stmt.executeUpdate(sql);
         System.out.println("Updated Skate Amount");
+    }
+
+    public static int checkSkatesForMax(int skateAmount, String skateSize) throws SQLException{
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT skateAmount FROM skate_inventory WHERE skateSize = '" + skateSize + "'");
+        int amount = 0;
+        if (rs.next()) {
+            amount = rs.getInt("skateAmount");
+        }
+        System.out.println("Maximum Amount" + amount);
+
+        return amount;
+
+    }
+
+    public static List<String> loadTickets() throws SQLException {
+        Statement stmt = connection.createStatement();
+        ResultSet resultSet = stmt.executeQuery("SELECT * FROM tickets");
+        List<String> ticketsList = new ArrayList<>();
+
+        while (resultSet.next()) {
+            String ticket_details = resultSet.getString("ticket_details");
+            String dateCreated = resultSet.getString("ticket_date");
+            String timeCreated = resultSet.getString("ticket_time");
+            String postedBy = resultSet.getString("staff_id");
+            ticketsList.add("Ticket: " + ticket_details + " \nPosted By: " + postedBy + "\n"
+                    + "Date: " + dateCreated + " Time: " + timeCreated );
+        }
+        return ticketsList;
+    }
+
+    public static void insertTicket(String text) {
+        //insert into query
+        String ticketDate = dateTime.justDate();
+        String ticketTime = dateTime.justTime();
+        String postedBy = "Skate Hire App";
+        try {
+            Statement stmt = connection.createStatement();
+            PreparedStatement pstmt = connection.prepareStatement(
+                    "INSERT INTO tickets(ticket_date, ticket_time, ticket_details, staff_id) VALUES(?, ?, ?, ?)");
+
+            pstmt.setString(1, ticketDate);
+            pstmt.setString(2, ticketTime);
+            pstmt.setString(3, text);
+            pstmt.setString(4, postedBy);
+
+            pstmt.executeUpdate();
+
+            System.out.println("Inserted Into Database");
+
+        } catch (SQLException e) {
+            System.out.println(e);
+            System.out.println("Announcement not inserted");
+        }
     }
 
 }
