@@ -2,7 +2,7 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -28,7 +28,7 @@
             </Button>
          </children>
       </AnchorPane>
-      <Label layoutX="166.0" layoutY="88.0" text="Create Ticket" textFill="WHITE">
+      <Label layoutX="166.0" layoutY="88.0" text="Maintenance" textFill="WHITE">
          <font>
             <Font size="16.0" />
          </font>
@@ -37,17 +37,22 @@
          <graphic>
             <ImageView fitHeight="28.0" fitWidth="28.0">
                <image>
-                  <Image url="@assets/unlocked.png" />
+                  <Image url="@../../../../../../../../WillsRollerDiscoSH/src/main/resources/com/example/willsrollerdiscosh/assets/unlocked.png" />
                </image>
             </ImageView>
          </graphic>
       </Button>
       <AnchorPane layoutX="26.0" layoutY="132.0" prefHeight="292.0" prefWidth="368.0" style="-fx-background-color: #525252; -fx-background-radius: 15px;">
          <children>
-            <TextArea id="ticketsTextBox" fx:id="ticketsTextBox" layoutY="14.0" prefHeight="267.0" prefWidth="368.0" promptText="Enter Your Ticket Text" styleClass="text-box" />
+            <Label id="currentAnnouncements" layoutX="14.0" layoutY="3.0" text="Current Maintenance Log" textFill="#bebebe">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+            <ListView id="MListView" fx:id="MListView" layoutY="30.0" prefHeight="313.0" prefWidth="366.0" style="-fx-background-radius: 5px;" styleClass="list-cell" />
          </children>
       </AnchorPane>
-      <Button fx:id="createTicketButton" layoutX="137.0" layoutY="523.0" mnemonicParsing="false" onAction="#createTicket" prefHeight="62.0" prefWidth="146.0" style="-fx-background-color: #48992B; -fx-background-radius: 15px;" text="Create" textFill="WHITE">
+      <Button fx:id="createMaintenanceButton" layoutX="138.0" layoutY="519.0" mnemonicParsing="false" onAction="#switchToAddMaintenance" prefHeight="62.0" prefWidth="146.0" style="-fx-background-color: #48992B; -fx-background-radius: 15px;" text="Create" textFill="WHITE">
          <font>
             <Font size="14.0" />
          </font>

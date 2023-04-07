@@ -15,13 +15,11 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ListIterator;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class sceneSelector {
     @FXML
-    Button homeButton, lockButton, unlockButton;
+    Button lockButton, unlockButton;
     private Stage stage;
     private static Scene scene;
     private Parent root;
@@ -74,6 +72,40 @@ public class sceneSelector {
         stage.setScene(scene);
         stage.show();
     }
+
+    public void switchToEditOrDeleteTicket(ActionEvent event) throws IOException{
+        root = FXMLLoader.load(getClass().getResource("editOrDeleteTicket.fxml"));
+        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
+
+        EditOrDeleteTicketsReloader();
+    }
+
+    public void switchToMaintenance(ActionEvent event) throws IOException{
+        root = FXMLLoader.load(getClass().getResource("maintenance.fxml"));
+        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
+
+        maintenanceReloader();
+    }
+
+    @FXML
+    public void switchToAddMaintenance(ActionEvent event) throws IOException {
+        root = FXMLLoader.load(getClass().getResource("createMaintenance.fxml"));
+        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
+
+        setMaintenanceTypeChoiceBox();
+        setSkateSizeChoiceBox();
+
+    }
+
 
     public static void checkForRecord(int count) {
         Button skateHire = (Button) scene.lookup("#skateHireButton");
@@ -255,21 +287,64 @@ public class sceneSelector {
 
     }
 
+    public void EditOrDeleteTicketsReloader() {
+        Timer reloadTickets = new Timer();
+        reloadTickets.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> {
+                    ListView<String> lv = (ListView<String>) scene.lookup("#CTListViewEditOrDelete");
+                    if (lv != null) {
+                        try {
+                            listViews.loadTicketEditOrDeleteListView(lv);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                        System.out.println("Ticket Reload");
+                    }
+                });
+            }
+        }, 0, 800);
+
+    }
+
     public static boolean compareToMaxValue(int currentValue, String skateSize) throws SQLException {
         int newValue = currentValue + 1;
         int currentMax = DBConnect.checkSkatesForMax(newValue, skateSize);
 
         if(currentValue == currentMax) {
          System.out.println("Values are Equal, cannot add anymore skates");
-         //warnings.alertSameAmountOfSkates();
+         warnings.alertSameAmountOfSkates().show();
 
          return true;
         }
         else if (newValue > currentMax) {
             System.out.println("Error, Skate Count is No Longer Accurate");
+            warnings.alertSkateValueError().show();
             return true;
         }
         return false;
+
+    }
+
+    public void maintenanceReloader() {
+        Timer maintenanceTimer = new Timer();
+        maintenanceTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> {
+                    try {
+                        ListView<Skate> lv = (ListView<Skate>) scene.lookup("#MListView");
+                        if (lv != null) {
+                            listViews.loadMaintenanceListView(lv);
+                            System.out.println("Maintenance Reload");
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+        }, 0, 1000); // reload every second
 
     }
 
@@ -285,6 +360,123 @@ public class sceneSelector {
             DBConnect.insertTicket(ticketText);
             ticketsTextBox.clear();
             locks.unlock(resourceName,lockedBy);
+        }
+    }
+
+    public static void deleteFunction(String item){
+        System.out.println("Delete Clicked");
+        resourceName = "tickets";
+        try {
+            locks.lock(resourceName, lockedBy);
+            String ticket = item.substring(8);
+            boolean success = DBConnect.deleteTicket(ticket);
+
+            if (success) {
+                ListView<Skate> lv = (ListView<Skate>) scene.lookup("#CTListViewEditOrDelete");
+                if (lv != null) {
+                    lv.getItems().clear();
+                    listViews.loadTicketEditOrDeleteListView(lv);;
+                    System.out.println("Tickets Reload Delete");
+                }
+            }locks.unlock(resourceName,lockedBy);
+        }
+        catch(Exception e) {
+            warnings.deleteNotComplete().show();
+        }
+    }
+
+    public void setMaintenanceTypeChoiceBox() {
+        ChoiceBox<String> choiceBox = (ChoiceBox<String>) scene.lookup("#maintenanceTypeChoiceBox");
+        List<String> type = new ArrayList<>();
+        type.add(new String("Skate Hire"));
+        type.add(new String("Games Equipment"));
+        type.add(new String("Lighting Rig"));
+        type.add(new String("DJ Equipment"));
+        type.add(new String("Front Door"));
+        type.add(new String("Other"));
+
+        choiceBox.getItems().addAll(type);
+    }
+
+    public void setSkateSizeChoiceBox() {
+        ChoiceBox<String> choiceBox = (ChoiceBox<String>) scene.lookup("#skateSizeChoiceBox");
+        List<String> skate = new ArrayList<>();
+
+        skate.add(null);
+        skate.add(new String("C11"));
+        skate.add(new String("C12"));
+        skate.add(new String("C13"));
+        skate.add(new String("1"));
+        skate.add(new String("2"));
+        skate.add(new String("3"));
+        skate.add(new String("4"));
+        skate.add(new String("5"));
+        skate.add(new String("6"));
+        skate.add(new String("7"));
+        skate.add(new String("8"));
+        skate.add(new String("9"));
+        skate.add(new String("10"));
+        skate.add(new String("11"));
+        skate.add(new String("12"));
+        skate.add(new String("13"));
+        choiceBox.getItems().addAll(skate);
+    }
+
+    public void createMaintenanceYesButton(){
+        Button noButton = (Button) scene.lookup("#CMRNo");
+        noButton.setVisible(true);
+
+        Button yesButton = (Button) scene.lookup("#CMRYes");
+        yesButton.setVisible(false);
+
+        Label skateSizeLbl = (Label) scene.lookup("#skateSizeLbl");
+        skateSizeLbl.setVisible(true);
+
+        ChoiceBox<String> choiceBox = (ChoiceBox<String>) scene.lookup("#skateSizeChoiceBox");
+        choiceBox.setVisible(true);
+    }
+
+    public void createMaintenanceNoButton(){
+        Button yesButton = (Button) scene.lookup("#CMRYes");
+        yesButton.setVisible(true);
+
+        Button noButton = (Button) scene.lookup("#CMRNo");
+        noButton.setVisible(false);
+
+        Label skateSizeLbl = (Label) scene.lookup("#skateSizeLbl");
+        skateSizeLbl.setVisible(false);
+
+        ChoiceBox<String> choiceBox = (ChoiceBox<String>) scene.lookup("#skateSizeChoiceBox");
+        choiceBox.setVisible(false);
+    }
+
+    public void createMaintenanceSubmit() {
+        System.out.println("Clicked");
+
+        ChoiceBox<String> choiceBox = (ChoiceBox<String>) scene.lookup("#maintenanceTypeChoiceBox");
+        ChoiceBox<String> skateSize = (ChoiceBox<String>) scene.lookup("#skateSizeChoiceBox");
+        TextArea maintenanceDetails = (TextArea) scene.lookup("#maintenanceDetails");
+
+        //if null
+        if (choiceBox == null || choiceBox.getValue() == null || choiceBox.getValue().isEmpty() || maintenanceDetails == null || maintenanceDetails.getText().isEmpty()) {
+            warnings.maintenanceEmpty().show();
+        } else {
+            try {
+                resourceName = "maintenance";
+                locks.lock(resourceName, lockedBy);
+                String typeIn = choiceBox.getValue();
+                String details = maintenanceDetails.getText();
+                String skateSizeIn = skateSize.getValue();
+                DBConnect.insertMaintenance(typeIn, details, skateSizeIn);
+
+                maintenanceDetails.clear();
+                locks.unlock(resourceName, lockedBy);
+            } catch (SQLException e) {
+                System.out.println("Couldn't Add Maintenance Record");
+                throw new RuntimeException(e);
+
+            }
+
         }
     }
 }
