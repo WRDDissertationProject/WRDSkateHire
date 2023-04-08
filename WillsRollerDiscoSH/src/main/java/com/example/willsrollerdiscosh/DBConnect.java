@@ -99,7 +99,7 @@ public class DBConnect {
         //System.out.println(skateSize + " Test");
         //update value by inserting into database
         Statement stmt = connection.createStatement();
-        String sql = "UPDATE current_skates SET skateAmount = " + newSkateAmount + " WHERE skateSize = " + skateSize + " ";
+        String sql = "UPDATE current_skates SET skateAmount = " + newSkateAmount + " WHERE skateSize = '" + skateSize + "'";
 
         stmt.executeUpdate(sql);
         System.out.println("Updated Skate Amount");
@@ -232,7 +232,7 @@ public class DBConnect {
     public static void updateSkateSizeAmount(String skateSize, int newAmount) {
         try {
             Statement stmt = connection.createStatement();
-            String sql = "UPDATE current_skates SET skateAmount = " + newAmount + " WHERE skateSize = '" + skateSize + "'";
+            String sql = "UPDATE current_skates SET skateAmount = '" + newAmount + "' WHERE skateSize = '" + skateSize + "'";
             stmt.executeUpdate(sql);
         } catch (SQLException e) {
             System.out.println(e);
@@ -253,6 +253,24 @@ public class DBConnect {
 
     public static int fetchSkateSizeCurrent(String skateSize) {
         int value = 0;
+        String query = "SELECT skateAmount FROM skate_inventory WHERE skateSize = ?";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, skateSize);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                value = resultSet.getInt("skateAmount");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return value;
+    }
+
+    public static int fetchSkateSizeAmount(String skateSize) {
+        int value = 0;
         String query = "SELECT skateAmount FROM current_skates WHERE skateSize = '" + skateSize + "'";
         try {
             Statement statement = connection.createStatement();
@@ -267,24 +285,7 @@ public class DBConnect {
         }
 
         return value;
-    }
 
-    public static int fetchSkateSizeAmount(String skateSize) {
-        int value = 0;
-        String query = "SELECT skateAmount FROM skate_inventory WHERE skateSize = '" + skateSize + "'";
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
-
-            if (resultSet.next()) {
-                value = resultSet.getInt("skateAmount");
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return value;
     }
 
 

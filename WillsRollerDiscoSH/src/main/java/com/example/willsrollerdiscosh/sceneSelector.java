@@ -169,6 +169,7 @@ public class sceneSelector {
                         setGraphic(null);
                     } else {
                         Button button = new Button("Pair Returned");
+                        button.getStyleClass().add("SH-Button");
                         Label label = new Label( "Skate Size: " + item.getSkateSize() + "\nSkates Available: " + item.getSkateAmount());
                         HBox hbox = new HBox();
                         hbox.getChildren().addAll(label, button);
