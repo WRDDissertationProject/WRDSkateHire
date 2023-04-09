@@ -43,6 +43,38 @@ public class sceneSelector {
         scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+
+        SesssionStartReloader();
+    }
+
+    public boolean sessionChecker() throws SQLException {
+        boolean session = DBConnect.checkForSessionStart();
+        if(session){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+
+    public void sessionStatus(){
+        Platform.runLater(() -> {
+
+            sessionStatus = (Label) root.lookup("#sessionStatus");
+
+            // Check if session has started
+            try {
+                String sessionTime = DBConnect.getSessionStartTime();
+                if (sessionChecker() == true) {
+                    sessionStatus.setText("Session: " + sessionTime);
+                } else {
+                    sessionStatus.setText(sessionTime);
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public void switchToSkateHire(ActionEvent event) throws IOException {
@@ -53,6 +85,7 @@ public class sceneSelector {
         stage.show();
 
         SkateHireReloader();
+        SesssionStartReloader();
     }
 
     public void switchToTickets(ActionEvent event) throws IOException {
@@ -63,6 +96,7 @@ public class sceneSelector {
         stage.show();
 
         TicketsReloader();
+        SesssionStartReloader();
     }
 
     public void switchToCreateTicket(ActionEvent event) throws IOException{
@@ -71,6 +105,8 @@ public class sceneSelector {
         scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+
+        SesssionStartReloader();
     }
 
     public void switchToEditOrDeleteTicket(ActionEvent event) throws IOException{
@@ -81,6 +117,7 @@ public class sceneSelector {
         stage.show();
 
         EditOrDeleteTicketsReloader();
+        SesssionStartReloader();
     }
 
     public void switchToMaintenance(ActionEvent event) throws IOException{
@@ -91,6 +128,7 @@ public class sceneSelector {
         stage.show();
 
         maintenanceReloader();
+        SesssionStartReloader();
     }
 
     @FXML
@@ -103,7 +141,19 @@ public class sceneSelector {
 
         setMaintenanceTypeChoiceBox();
         setSkateSizeChoiceBox();
+        SesssionStartReloader();
 
+    }
+
+    @FXML
+    public void switchToExtraSales(ActionEvent event) throws IOException{
+        root = FXMLLoader.load(getClass().getResource("extraSales.fxml"));
+        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
+
+        SesssionStartReloader();
     }
 
 
@@ -264,6 +314,19 @@ public class sceneSelector {
                 });
             }
         }, 0, 800);
+
+    }
+    public void SesssionStartReloader() {
+        Timer reloadSkateHire = new Timer();
+        reloadSkateHire.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() -> {
+                    System.out.println("Session Start Reload");
+                    sessionStatus();
+                });
+            }
+        }, 0, 800); // reload every second
 
     }
 

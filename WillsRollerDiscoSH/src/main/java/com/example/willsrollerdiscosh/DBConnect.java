@@ -288,5 +288,25 @@ public class DBConnect {
 
     }
 
+    public static boolean checkForSessionStart() throws SQLException {
+        String query = "SELECT * FROM current_session";
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+        return rs.next();
+    }
+    public static String getSessionStartTime() {
+        String query = "SELECT current_dateTime FROM current_session";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            if (rs.next()) {
+                return rs.getString("current_dateTime");
+            } else {
+                return "Session not started";
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }
