@@ -29,4 +29,9 @@ public class warnings {
         Alert valueError = new Alert(Alert.AlertType.ERROR, "Skate Count is No Longer Accurate", ButtonType.OK);
         return valueError;
     }
+
+    public static Alert sessionNotStarted(){
+        Alert sessionNotStarted = new Alert(Alert.AlertType.WARNING, "Cannot Admit Customers Before a Session Has Started");
+        return sessionNotStarted;
+    }
 }

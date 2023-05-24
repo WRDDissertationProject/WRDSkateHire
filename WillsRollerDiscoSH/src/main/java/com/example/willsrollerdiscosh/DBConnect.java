@@ -308,5 +308,36 @@ public class DBConnect {
         }
     }
 
+    public static void addExtraPurchase(Double purchaseCost) throws SQLException {
+
+        //fetch current session
+        String currentSessionQuery = "SELECT * FROM current_session";
+        Statement selectStmt = connection.createStatement();
+        ResultSet rs = selectStmt.executeQuery(currentSessionQuery);
+
+        int extrasSoldAmountFetch = 0;
+        Double extrasSoldTotalFetch =0.00;
+        String currentSession = " ";
+
+        while (rs.next()) {
+            currentSession = rs.getString("current_dateTime");
+            extrasSoldAmountFetch = rs.getInt("Current_Extras_sold_amount");
+            extrasSoldTotalFetch = rs.getDouble("Current_Extras_sold_total");
+        }
+
+        int extrasSoldAmount = extrasSoldAmountFetch + 1;
+        Double extrasSoldTotal = extrasSoldTotalFetch + purchaseCost;
+
+
+        String updateQuery = "UPDATE current_session SET Current_Extras_sold_amount = ?, " +
+                "Current_Extras_sold_total = ? WHERE current_dateTime = ?";
+        PreparedStatement updateStmt = connection.prepareStatement(updateQuery);
+        updateStmt.setInt(1, extrasSoldAmount);
+        updateStmt.setDouble(2, extrasSoldTotal);
+        updateStmt.setString(3, currentSession);
+
+        updateStmt.executeUpdate();
+    }
+
 
 }

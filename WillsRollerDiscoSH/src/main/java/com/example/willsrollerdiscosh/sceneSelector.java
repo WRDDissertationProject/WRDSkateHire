@@ -16,6 +16,9 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class sceneSelector {
     @FXML
@@ -29,7 +32,7 @@ public class sceneSelector {
 
     @FXML
     static
-    Label sessionStatus;
+    Label sessionStatus, salesStatus;
 
     boolean skateHireLocked = false;
 
@@ -543,6 +546,126 @@ public class sceneSelector {
 
         }
     }
+
+    public void showSalesLabel(Parent root) {
+        Label salesLabel= (Label) root.lookup("#salesStatus");
+        salesLabel.setVisible(true);
+
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.schedule(() -> {
+            Platform.runLater(() -> {
+                salesLabel.setVisible(false);
+            });
+        }, 2, TimeUnit.SECONDS);
+    }
+
+    public void addGlowstickSale(ActionEvent event) throws SQLException {
+        resourceName ="extraSales";
+        boolean session = sessionChecker();
+
+        if(session){
+            System.out.println("Add Glow Stick Sale");
+            showSalesLabel(((Node) event.getSource()).getScene().getRoot());
+
+            locks.lock(resourceName,lockedBy);
+            DBConnect.addExtraPurchase(0.20);
+            locks.unlock(resourceName,lockedBy);
+        }
+        else {
+            System.out.println("Session not started");
+            warnings.sessionNotStarted().show();
+        }
+    }
+
+    public void addFoamGlowstickSale(ActionEvent event) throws SQLException {
+        resourceName ="extraSales";
+        boolean session = sessionChecker();
+
+        if(session){
+            System.out.println("Add Foam Glow Stick Sale");
+            showSalesLabel(((Node) event.getSource()).getScene().getRoot());
+
+            locks.lock(resourceName,lockedBy);
+            DBConnect.addExtraPurchase(2.00);
+            locks.unlock(resourceName,lockedBy);
+        }
+        else {
+            System.out.println("Session not started");
+            warnings.sessionNotStarted().show();
+        }
+    }
+
+    public void addSkateLacesSale(ActionEvent event) throws SQLException {
+        resourceName ="extraSales";
+        boolean session = sessionChecker();
+
+        if(session){
+            System.out.println("Add Skate Laces Sale");
+            showSalesLabel(((Node) event.getSource()).getScene().getRoot());
+
+            locks.lock(resourceName,lockedBy);
+            DBConnect.addExtraPurchase(3.00);
+            locks.unlock(resourceName,lockedBy);
+        }
+        else {
+            System.out.println("Session not started");
+            warnings.sessionNotStarted().show();
+        }
+    }
+
+    public void addSeasonalSale(ActionEvent event) throws SQLException {
+        resourceName ="extraSales";
+        boolean session = sessionChecker();
+
+        if(session){
+            System.out.println("Add Seasonal Sale");
+            showSalesLabel(((Node) event.getSource()).getScene().getRoot());
+
+            locks.lock(resourceName,lockedBy);
+            DBConnect.addExtraPurchase(1.00);
+            locks.unlock(resourceName,lockedBy);
+        }
+        else {
+            System.out.println("Session not started");
+            warnings.sessionNotStarted().show();
+        }
+    }
+
+    public void addItemReplacement(ActionEvent event) throws SQLException {
+        resourceName ="extraSales";
+        boolean session = sessionChecker();
+
+        if(session){
+            System.out.println("Add ItemReplacement");
+            showSalesLabel(((Node) event.getSource()).getScene().getRoot());
+
+            locks.lock(resourceName,lockedBy);
+            DBConnect.addExtraPurchase(0.00);
+            locks.unlock(resourceName,lockedBy);
+        }
+        else {
+            System.out.println("Session not started");
+            warnings.sessionNotStarted().show();
+        }
+    }
+
+    public void addFreePromotion(ActionEvent event) throws SQLException {
+        resourceName ="extraSales";
+        boolean session = sessionChecker();
+
+        if(session){
+            System.out.println("Add Free Promotion");
+            showSalesLabel(((Node) event.getSource()).getScene().getRoot());
+            locks.lock(resourceName,lockedBy);
+            DBConnect.addExtraPurchase(0.00);
+            locks.unlock(resourceName,lockedBy);
+        }
+        else {
+            System.out.println("Session not started");
+            warnings.sessionNotStarted().show();
+        }
+    }
+
 }
 
 
