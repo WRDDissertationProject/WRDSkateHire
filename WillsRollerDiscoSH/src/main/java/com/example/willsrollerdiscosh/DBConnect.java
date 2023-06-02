@@ -339,5 +339,13 @@ public class DBConnect {
         updateStmt.executeUpdate();
     }
 
-
+    public static void addTransaction(String session, String type, String time, Double value) throws SQLException {
+        System.out.println("Transaction Added Test");
+        Statement stmt = connection.createStatement();
+        String sql = "INSERT INTO transaction_history(session_dateTime, transaction_type, transaction_time, " +
+                "transaction_value)" +
+                " VALUES('" + session + "', '" + type + "', '" + time + "', '" + value + "')";
+        stmt.executeUpdate(sql);
+        System.out.println("Inserted Into Database");
+    }
 }

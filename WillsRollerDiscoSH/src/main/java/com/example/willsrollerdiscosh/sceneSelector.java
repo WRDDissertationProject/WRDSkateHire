@@ -564,11 +564,21 @@ public class sceneSelector {
         boolean session = sessionChecker();
 
         if(session){
+            double value = 0.20;
+            String type = "Glow Stick";
+            String sessionDateTime = DBConnect.getSessionStartTime();
+
             System.out.println("Add Glow Stick Sale");
             showSalesLabel(((Node) event.getSource()).getScene().getRoot());
 
             locks.lock(resourceName,lockedBy);
-            DBConnect.addExtraPurchase(0.20);
+            DBConnect.addExtraPurchase(value);
+            locks.unlock(resourceName,lockedBy);
+
+            resourceName= "transactions";
+            locks.lock(resourceName,lockedBy);
+            String time = dateTime.justTime();
+            DBConnect.addTransaction(sessionDateTime, type, time, value);
             locks.unlock(resourceName,lockedBy);
         }
         else {
@@ -582,11 +592,21 @@ public class sceneSelector {
         boolean session = sessionChecker();
 
         if(session){
+            double value = 2.00;
+            String type = "Foam Glow Stick";
+            String sessionDateTime = DBConnect.getSessionStartTime();
+
             System.out.println("Add Foam Glow Stick Sale");
             showSalesLabel(((Node) event.getSource()).getScene().getRoot());
 
             locks.lock(resourceName,lockedBy);
-            DBConnect.addExtraPurchase(2.00);
+            DBConnect.addExtraPurchase(value);
+            locks.unlock(resourceName,lockedBy);
+
+            resourceName= "transactions";
+            locks.lock(resourceName,lockedBy);
+            String time = dateTime.justTime();
+            DBConnect.addTransaction(sessionDateTime, type, time, value);
             locks.unlock(resourceName,lockedBy);
         }
         else {
@@ -596,6 +616,10 @@ public class sceneSelector {
     }
 
     public void addSkateLacesSale(ActionEvent event) throws SQLException {
+        double value = 3.00;
+        String type = "Skate Laces";
+        String sessionDateTime = DBConnect.getSessionStartTime();
+
         resourceName ="extraSales";
         boolean session = sessionChecker();
 
@@ -604,7 +628,13 @@ public class sceneSelector {
             showSalesLabel(((Node) event.getSource()).getScene().getRoot());
 
             locks.lock(resourceName,lockedBy);
-            DBConnect.addExtraPurchase(3.00);
+            DBConnect.addExtraPurchase(value);
+            locks.unlock(resourceName,lockedBy);
+
+            resourceName= "transactions";
+            locks.lock(resourceName,lockedBy);
+            String time = dateTime.justTime();
+            DBConnect.addTransaction(sessionDateTime, type, time, value);
             locks.unlock(resourceName,lockedBy);
         }
         else {
@@ -614,6 +644,10 @@ public class sceneSelector {
     }
 
     public void addSeasonalSale(ActionEvent event) throws SQLException {
+        double value = 1.00;
+        String type = "Seasonal Sale";
+        String sessionDateTime = DBConnect.getSessionStartTime();
+
         resourceName ="extraSales";
         boolean session = sessionChecker();
 
@@ -622,7 +656,13 @@ public class sceneSelector {
             showSalesLabel(((Node) event.getSource()).getScene().getRoot());
 
             locks.lock(resourceName,lockedBy);
-            DBConnect.addExtraPurchase(1.00);
+            DBConnect.addExtraPurchase(value);
+            locks.unlock(resourceName,lockedBy);
+
+            resourceName= "transactions";
+            locks.lock(resourceName,lockedBy);
+            String time = dateTime.justTime();
+            DBConnect.addTransaction(sessionDateTime, type, time, value);
             locks.unlock(resourceName,lockedBy);
         }
         else {
@@ -632,6 +672,10 @@ public class sceneSelector {
     }
 
     public void addItemReplacement(ActionEvent event) throws SQLException {
+        double value = 0.00;
+        String type = "Replacement";
+        String sessionDateTime = DBConnect.getSessionStartTime();
+
         resourceName ="extraSales";
         boolean session = sessionChecker();
 
@@ -640,7 +684,13 @@ public class sceneSelector {
             showSalesLabel(((Node) event.getSource()).getScene().getRoot());
 
             locks.lock(resourceName,lockedBy);
-            DBConnect.addExtraPurchase(0.00);
+            DBConnect.addExtraPurchase(value);
+            locks.unlock(resourceName,lockedBy);
+
+            resourceName= "transactions";
+            locks.lock(resourceName,lockedBy);
+            String time = dateTime.justTime();
+            DBConnect.addTransaction(sessionDateTime, type, time, value);
             locks.unlock(resourceName,lockedBy);
         }
         else {
@@ -650,6 +700,10 @@ public class sceneSelector {
     }
 
     public void addFreePromotion(ActionEvent event) throws SQLException {
+        double value = 0.00;
+        String type = "Free Promotion";
+        String sessionDateTime = DBConnect.getSessionStartTime();
+
         resourceName ="extraSales";
         boolean session = sessionChecker();
 
@@ -657,7 +711,13 @@ public class sceneSelector {
             System.out.println("Add Free Promotion");
             showSalesLabel(((Node) event.getSource()).getScene().getRoot());
             locks.lock(resourceName,lockedBy);
-            DBConnect.addExtraPurchase(0.00);
+            DBConnect.addExtraPurchase(value);
+            locks.unlock(resourceName,lockedBy);
+
+            resourceName= "transactions";
+            locks.lock(resourceName,lockedBy);
+            String time = dateTime.justTime();
+            DBConnect.addTransaction(sessionDateTime, type, time, value);
             locks.unlock(resourceName,lockedBy);
         }
         else {
