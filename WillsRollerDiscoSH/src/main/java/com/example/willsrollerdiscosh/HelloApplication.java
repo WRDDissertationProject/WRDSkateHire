@@ -1,20 +1,28 @@
+/** WILLS ROLLER DISCO - DISSERTATION PROJECT
+ *  AUTHOR : EMILY FLETCHER
+ *  STUDENT NUMBER: 18410839
+ *  APPLICATION: WillsRollerDiscoSH
+ *  FILE TITLE: HelloApplication.java
+ *  APPLICATION VERSION: 2.0
+ *  DATE OF WRITING: 20/06/2023
+ *
+ *  PURPOSE:
+ *   Application starting point, launches application and also connects to database
+ *   */
+
+//PACKAGE
 package com.example.willsrollerdiscosh;
 
+//IMPORTS
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -27,7 +35,6 @@ public class HelloApplication extends Application {
         stage.setTitle("Wills Roller Disco - Skate Hire");
         stage.setScene(scene);
         stage.show();
-
 
         DBConnect connect = new DBConnect();
         connect.connect();
@@ -47,16 +54,13 @@ public class HelloApplication extends Application {
             }
         }, 0, 2000);
 
-        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent windowEvent) {
-                Platform.exit();
-                System.exit(0);
-            }
+        stage.setOnCloseRequest(windowEvent -> {
+            Platform.exit();
+            System.exit(0);
         });
     }
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) {
         DBConnect connect = new DBConnect();
         connect.connect();
         connect.sessionStartChecker();

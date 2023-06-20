@@ -1,5 +1,20 @@
+/** WILLS ROLLER DISCO - DISSERTATION PROJECT
+ *  AUTHOR : EMILY FLETCHER
+ *  STUDENT NUMBER: 18410839
+ *  APPLICATION: WillsRollerDiscoSH
+ *  FILE TITLE: listViews.java
+ *  APPLICATION VERSION: 2.0
+ *  DATE OF WRITING: 20/06/2023
+ *
+ *  PURPOSE:
+ *   class that contains all the listviews used by the application, seperated for code clarity,
+ *   connected to sceneSelector.
+ *   */
+
+//PACKAGE
 package com.example.willsrollerdiscosh;
 
+//IMPORT
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
@@ -7,11 +22,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-
 import java.sql.SQLException;
 import java.util.List;
-
 
 public class listViews {
     public static void loadAnnouncementsListView(ListView lv) throws SQLException {
@@ -21,16 +33,6 @@ public class listViews {
             lv.setItems(items);
         }
     }
-    /*Before
-    *List<String> announcementsData = DBConnect.loadAnnouncement();
-                        ObservableList<String> items = FXCollections.observableArrayList(announcementsData);
-                        ListView lv = (ListView) scene.lookup("#announcementsList");
-                        lv.setItems(items);
-    * After
-    *
-    * ListView lv = (ListView) scene.lookup("#announcementsList");
-                        listViews.loadAnnouncementsListView(lv);*/
-
 
     public static void loadTicketsListView(ListView lv) throws SQLException {
         if (lv.getItems().isEmpty()) {
@@ -74,12 +76,10 @@ public class listViews {
                         editButton.getStyleClass().add("edit-button-style");
                         deleteButton.getStyleClass().add("delete-button-style");
 
-
-
                         // Set the event handlers for the Edit and Delete buttons
                         editButton.setOnAction(event -> {
                             // Call the edit function with the selected item
-                            editFunction(item);
+                            editFunction();
                         });
                         deleteButton.setOnAction(event -> {
                             // Call the delete function with the selected item
@@ -91,7 +91,7 @@ public class listViews {
         }
     }
 
-    public static void editFunction(String item){
+    public static void editFunction(){
         System.out.println("Edit Clicked");
     }
 

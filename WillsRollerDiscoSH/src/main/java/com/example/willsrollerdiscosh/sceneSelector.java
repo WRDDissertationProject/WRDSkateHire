@@ -1,5 +1,20 @@
+/** WILLS ROLLER DISCO - DISSERTATION PROJECT
+ *  AUTHOR : EMILY FLETCHER
+ *  STUDENT NUMBER: 18410839
+ *  APPLICATION: WillsRollerDiscoSH
+ *  FILE TITLE: sceneSelector.java
+ *  APPLICATION VERSION: 2.0
+ *  DATE OF WRITING: 20/06/2023
+ *
+ *  PURPOSE:
+ *    All Methods that are not seperated and grouped, contains all the scene switches and all the methods that relate,
+ *    such as scene selectors, actions and buttons etc.
+ *   */
+
+//PACKAGE
 package com.example.willsrollerdiscosh;
 
+//IMPORTS
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -12,7 +27,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
@@ -25,19 +39,14 @@ public class sceneSelector {
     Button lockButton, unlockButton;
     private Stage stage;
     private static Scene scene;
-    private Parent root;
-
+    private static Parent root;
     @FXML
     TextArea ticketsTextBox;
-
     @FXML
     static
     Label sessionStatus, salesStatus;
-
     boolean skateHireLocked = false;
-
-    static String resourceName;
-    static String lockedBy = "SkateHireApp";
+    static String  resourceName, lockedBy = "SkateHireApp";
 
     @FXML
     public void switchToHome(ActionEvent event) throws IOException {
@@ -47,21 +56,12 @@ public class sceneSelector {
         stage.setScene(scene);
         stage.show();
 
-        SesssionStartReloader();
+        reloader.sessionStartReloader();
     }
 
-    public boolean sessionChecker() throws SQLException {
-        boolean session = DBConnect.checkForSessionStart();
-        if(session){
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
+    public static boolean sessionChecker() throws SQLException {return DBConnect.checkForSessionStart();}
 
-
-    public void sessionStatus(){
+    public static void sessionStatus(){
         Platform.runLater(() -> {
 
             sessionStatus = (Label) root.lookup("#sessionStatus");
@@ -69,7 +69,7 @@ public class sceneSelector {
             // Check if session has started
             try {
                 String sessionTime = DBConnect.getSessionStartTime();
-                if (sessionChecker() == true) {
+                if (sessionChecker()) {
                     sessionStatus.setText("Session: " + sessionTime);
                 } else {
                     sessionStatus.setText(sessionTime);
@@ -87,8 +87,8 @@ public class sceneSelector {
         stage.setScene(scene);
         stage.show();
 
-        SkateHireReloader();
-        SesssionStartReloader();
+        reloader.SkateHireReloader(scene);
+        reloader.sessionStartReloader();
     }
 
     public void switchToTickets(ActionEvent event) throws IOException {
@@ -98,8 +98,8 @@ public class sceneSelector {
         stage.setScene(scene);
         stage.show();
 
-        TicketsReloader();
-        SesssionStartReloader();
+        reloader.TicketsReloader(scene);
+        reloader.sessionStartReloader();
     }
 
     public void switchToCreateTicket(ActionEvent event) throws IOException{
@@ -109,7 +109,7 @@ public class sceneSelector {
         stage.setScene(scene);
         stage.show();
 
-        SesssionStartReloader();
+        reloader.sessionStartReloader();
     }
 
     public void switchToEditOrDeleteTicket(ActionEvent event) throws IOException{
@@ -119,8 +119,8 @@ public class sceneSelector {
         stage.setScene(scene);
         stage.show();
 
-        EditOrDeleteTicketsReloader();
-        SesssionStartReloader();
+        reloader.EditOrDeleteTicketsReloader(scene);
+        reloader.sessionStartReloader();
     }
 
     public void switchToMaintenance(ActionEvent event) throws IOException{
@@ -130,8 +130,8 @@ public class sceneSelector {
         stage.setScene(scene);
         stage.show();
 
-        maintenanceReloader();
-        SesssionStartReloader();
+        reloader.maintenanceReloader(scene);
+        reloader.sessionStartReloader();
     }
 
     @FXML
@@ -144,8 +144,7 @@ public class sceneSelector {
 
         setMaintenanceTypeChoiceBox();
         setSkateSizeChoiceBox();
-        SesssionStartReloader();
-
+        reloader.sessionStartReloader();
     }
 
     @FXML
@@ -156,60 +155,34 @@ public class sceneSelector {
         stage.setScene(scene);
         stage.show();
 
-        SesssionStartReloader();
+        reloader.sessionStartReloader();
     }
 
-
     public static void checkForRecord(int count) {
-        Button skateHire = (Button) scene.lookup("#skateHireButton");
-        Button tickets = (Button) scene.lookup("#ticketsButton");
-        Button maintenance = (Button) scene.lookup("#maintenanceButton");
-
         if (count > 0) {
             System.out.println("Session Currently Running");
 
-            //skateHire.setDisable(false);
-            // tickets.setDisable(false);
-            // maintenance.setDisable(false);
         } else {
             System.out.println("Session Stopped");
-            //Label session = (Label) scene.lookup("#sessionStatus");
-            //session.setText("Session Stopped");
 
-            //skateHire.setDisable(true);
-            //tickets.setDisable(true);
-            //maintenance.setDisable(true);
         }
     }
 
-    public static void recordExists() {
-        //Label session = (Label) scene.lookup("#sessionStatus");
-        //session.setText("Session Currently Running");
-        System.out.println("Session Currently Running");
-    }
-
-    public static void recordDoesNotExist() {
-        //Label session = (Label) scene.lookup("#sessionStatus");
-
-        Button skateHire = (Button) scene.lookup("#skateHireButton");
-        skateHire.setDisable(true);
-    }
-
-    public void lockSkateHire(ActionEvent event) throws IOException {
+    public void lockSkateHire() {
         System.out.println("Locked");
         this.lockButton.setVisible(false);
         skateHireLocked = true;
         this.unlockButton.setVisible(true);
     }
 
-    public void unlockSkateHire(ActionEvent event) throws IOException {
+    public void unlockSkateHire() {
         System.out.println("unlocked");
         this.unlockButton.setVisible(false);
         skateHireLocked = false;
         this.lockButton.setVisible(true);
     }
 
-    public static ObservableList<Skate> loadSkateHire(ListView lv) throws SQLException{
+    public static ObservableList<Skate> loadSkateHire(ListView lv){
         resourceName = "skateHire";
         ObservableList<Skate> data = DBConnect.loadSkates();
         if (lv.getItems().isEmpty()){
@@ -251,7 +224,7 @@ public class sceneSelector {
 
                             //if skates below max value replace
                             try {
-                                if (compareToMaxValue(currentValue, item.getSkateSize()) == false) {
+                                if (!compareToMaxValue(currentValue, item.getSkateSize())) {
 
                                     int newValue = item.getSkateAmount() + 1 ;
                                     item.setSkateAmount(newValue);
@@ -277,8 +250,6 @@ public class sceneSelector {
                                         setStyle("-fx-background-color: #FA3837;");
                                         label.setTextFill(Color.web("BEBEBE"));
                                     }
-                                } else {
-                                    //errors.minusSkates();
                                 }
                             } catch (SQLException e) {
                                 throw new RuntimeException(e);
@@ -298,86 +269,9 @@ public class sceneSelector {
         return data;
     }
 
-
-    public void SkateHireReloader() {
-        Timer reloadSkateHire = new Timer();
-        reloadSkateHire.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    try {
-                        ListView<Skate> lv = (ListView<Skate>) scene.lookup("#SHListView");
-                        if (lv != null) {
-                            listViews.loadSkateHireListView(lv);
-                            System.out.println("Skate Hire Reload");
-                        }
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            }
-        }, 0, 800);
-
-    }
-    public void SesssionStartReloader() {
-        Timer reloadSkateHire = new Timer();
-        reloadSkateHire.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    System.out.println("Session Start Reload");
-                    sessionStatus();
-                });
-            }
-        }, 0, 800); // reload every second
-
-    }
-
-    public void TicketsReloader() {
-        Timer reloadTickets = new Timer();
-        reloadTickets.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    ListView<Skate> lv = (ListView<Skate>) scene.lookup("#CTListView");
-                    if (lv != null) {
-                        try {
-                            listViews.loadTicketsListView(lv);
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                        System.out.println("Ticket Reload");
-                    }
-                });
-            }
-        }, 0, 800);
-
-    }
-
-    public void EditOrDeleteTicketsReloader() {
-        Timer reloadTickets = new Timer();
-        reloadTickets.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    ListView<String> lv = (ListView<String>) scene.lookup("#CTListViewEditOrDelete");
-                    if (lv != null) {
-                        try {
-                            listViews.loadTicketEditOrDeleteListView(lv);
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                        System.out.println("Ticket Reload");
-                    }
-                });
-            }
-        }, 0, 800);
-
-    }
-
     public static boolean compareToMaxValue(int currentValue, String skateSize) throws SQLException {
         int newValue = currentValue + 1;
-        int currentMax = DBConnect.checkSkatesForMax(newValue, skateSize);
+        int currentMax = DBConnect.checkSkatesForMax(skateSize);
 
         if(currentValue == currentMax) {
          System.out.println("Values are Equal, cannot add anymore skates");
@@ -394,28 +288,7 @@ public class sceneSelector {
 
     }
 
-    public void maintenanceReloader() {
-        Timer maintenanceTimer = new Timer();
-        maintenanceTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    try {
-                        ListView<Skate> lv = (ListView<Skate>) scene.lookup("#MListView");
-                        if (lv != null) {
-                            listViews.loadMaintenanceListView(lv);
-                            System.out.println("Maintenance Reload");
-                        }
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            }
-        }, 0, 1000); // reload every second
-
-    }
-
-    public void createTicket(ActionEvent event) throws IOException, SQLException {
+    public void createTicket() throws SQLException {
         resourceName = "tickets";
         if (ticketsTextBox.getText().isEmpty()) {
             warnings.alertEmptyBox().show();
@@ -442,7 +315,7 @@ public class sceneSelector {
                 ListView<Skate> lv = (ListView<Skate>) scene.lookup("#CTListViewEditOrDelete");
                 if (lv != null) {
                     lv.getItems().clear();
-                    listViews.loadTicketEditOrDeleteListView(lv);;
+                    listViews.loadTicketEditOrDeleteListView(lv);
                     System.out.println("Tickets Reload Delete");
                 }
             }locks.unlock(resourceName,lockedBy);
@@ -455,13 +328,12 @@ public class sceneSelector {
     public void setMaintenanceTypeChoiceBox() {
         ChoiceBox<String> choiceBox = (ChoiceBox<String>) scene.lookup("#maintenanceTypeChoiceBox");
         List<String> type = new ArrayList<>();
-        type.add(new String("Skate Hire"));
-        type.add(new String("Games Equipment"));
-        type.add(new String("Lighting Rig"));
-        type.add(new String("DJ Equipment"));
-        type.add(new String("Front Door"));
-        type.add(new String("Other"));
-
+        type.add("Skate Hire");
+        type.add("Games Equipment");
+        type.add("Lighting Rig");
+        type.add("DJ Equipment");
+        type.add("Front Door");
+        type.add("Other");
         choiceBox.getItems().addAll(type);
     }
 
@@ -470,22 +342,22 @@ public class sceneSelector {
         List<String> skate = new ArrayList<>();
 
         skate.add(null);
-        skate.add(new String("C11"));
-        skate.add(new String("C12"));
-        skate.add(new String("C13"));
-        skate.add(new String("1"));
-        skate.add(new String("2"));
-        skate.add(new String("3"));
-        skate.add(new String("4"));
-        skate.add(new String("5"));
-        skate.add(new String("6"));
-        skate.add(new String("7"));
-        skate.add(new String("8"));
-        skate.add(new String("9"));
-        skate.add(new String("10"));
-        skate.add(new String("11"));
-        skate.add(new String("12"));
-        skate.add(new String("13"));
+        skate.add("C11");
+        skate.add("C12");
+        skate.add("C13");
+        skate.add("1");
+        skate.add("2");
+        skate.add("3");
+        skate.add("4");
+        skate.add("5");
+        skate.add("6");
+        skate.add("7");
+        skate.add("8");
+        skate.add("9");
+        skate.add("10");
+        skate.add("11");
+        skate.add("12");
+        skate.add("13");
         choiceBox.getItems().addAll(skate);
     }
 
@@ -552,11 +424,7 @@ public class sceneSelector {
         salesLabel.setVisible(true);
 
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        executor.schedule(() -> {
-            Platform.runLater(() -> {
-                salesLabel.setVisible(false);
-            });
-        }, 2, TimeUnit.SECONDS);
+        executor.schedule(() -> Platform.runLater(() -> salesLabel.setVisible(false)), 2, TimeUnit.SECONDS);
     }
 
     public void addGlowstickSale(ActionEvent event) throws SQLException {
@@ -725,14 +593,4 @@ public class sceneSelector {
             warnings.sessionNotStarted().show();
         }
     }
-
 }
-
-
-
-
-//add / remove skates
-//max number = max of skates
-
-//if add skate = < max Number
-//error can't be added

@@ -1,5 +1,20 @@
+/** WILLS ROLLER DISCO - DISSERTATION PROJECT
+ *  AUTHOR : EMILY FLETCHER
+ *  STUDENT NUMBER: 18410839
+ *  APPLICATION: WillsRollerDiscoSH
+ *  FILE TITLE: locks.java
+ *  APPLICATION VERSION: 2.0
+ *  DATE OF WRITING: 20/06/2023
+ *
+ *  PURPOSE:
+ *   used to set up database locks, prevents concurrency issues, forces the application to wait if another is making
+ *   changes to the database.
+ *   */
+
+//PACKAGE
 package com.example.willsrollerdiscosh;
 
+//IMPORT
 import java.sql.*;
 
 public class locks {
@@ -22,7 +37,6 @@ public class locks {
                 connection = DriverManager.getConnection(url, username, password);
             } catch (SQLException e) {
                 System.out.println("Run Time Exception (Connection)");
-                ;
             }
             try {
                 Statement statement = connection.createStatement();
@@ -60,5 +74,4 @@ public class locks {
             throw new SQLException("Failed to release lock for resource: " + resourceName);
         }
     }
-
 }
