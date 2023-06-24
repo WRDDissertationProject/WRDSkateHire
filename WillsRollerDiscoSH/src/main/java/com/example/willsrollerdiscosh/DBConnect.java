@@ -23,16 +23,40 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/*Resources Used:
+ *Java Loggers:
+ *Loggers instead of System prints
+ *Connecting to a Database
+ *Connecting to Docker Hosted Database
+ *Observable Lists
+ *Locks
+ *Database Concurrency
+ *Lock Hanging */
+
+
 public class DBConnect {
+    //Defining a Logger, used for error recording
     private static final Logger log = Logger.getLogger(String.valueOf(DBConnect.class));
-    String url = "jdbc:mysql://localhost:3306/wrdDatabase";
+
+    /******************************************************
+     Local Testing Database Connections
+
+     String url = "jdbc:mysql://localhost:3306/wrdDatabase";
+     String username = "root";
+     String password = "root";
+     ********************************************************/
+
+    /*Docker Database Connections
+     * Using Local host currently due to firewall issues with University Connections*/
+    String url = "jdbc:mysql://localhost:3307/wrddatabase";
+    //String url = "jdbc:mysql://172.17.0.2:3307/wrddatabase";
     String username = "root";
-    String password = "root";
-
+    String password = "my-secret-pw";
     static Connection connection = null;
-
     static ResultSet rs;
 
+    //code for starting a database connection
+    //various tries and catches are used to account for common issues and debugging a broken connection
     public void connect() {
         {
             try {
@@ -54,6 +78,9 @@ public class DBConnect {
         }
     }
 
+    //Checks whether a session has started
+    //Uses a reloader built in
+    //Counts the rows, if the row has any data (above 0) a session has started
     public void sessionStartChecker() {
         Timer reloadSessionChecker = new Timer();
         reloadSessionChecker.schedule(new TimerTask() {
@@ -73,9 +100,10 @@ public class DBConnect {
                     }
                 });
             }
-        }, 2000, 2000);
+        }, 0, 2000); //Loaded every two seconds
     }
-
+    //Creates a list that defines the layouts for announcements
+    //Used for announcements list view
     public static List<String> loadAnnouncement() throws SQLException {
         Statement stmt = connection.createStatement();
         ResultSet resultSet = stmt.executeQuery("SELECT announcement_details FROM announcements");
@@ -88,9 +116,13 @@ public class DBConnect {
         return announcementsList;
     }
 
+    //List that fetches all the skate sizes and amount and sets them in a layout for use in a list view
     public static ObservableList<Skate> loadSkates() {
+        //Defining List
         ObservableList<Skate> data = FXCollections.observableArrayList();
 
+        //Trying to connect to the database
+        //If connected, query is executed
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT skateSize, skateAmount FROM current_skates");
@@ -104,20 +136,22 @@ public class DBConnect {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+        //returns results in layout needed for list view
         return data;
     }
 
+    //Updates the skate amount with a new value, used when skates are returned
     public static void updateSkateListPlus(int newSkateAmount, String skateSize) throws SQLException {
-        //System.out.println(newSkateAmount + "Test");
-        //System.out.println(skateSize + " Test");
         //update value by inserting into database
         Statement stmt = connection.createStatement();
         String sql = "UPDATE current_skates SET skateAmount = " + newSkateAmount + " WHERE skateSize = '" + skateSize + "'";
-
         stmt.executeUpdate(sql);
+        //Testing statement
         System.out.println("Updated Skate Amount");
     }
 
+    //Checks whether the amount of skates has reached its starting value
+    //Prevents the user adding more skates than there is physically available
     public static int checkSkatesForMax(String skateSize) throws SQLException {
         Statement stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT skateAmount FROM skate_inventory WHERE skateSize = '" + skateSize + "'");
@@ -129,11 +163,13 @@ public class DBConnect {
         return amount;
     }
 
+    //Used to fetch all tickets currently stored
     public static List<String> loadTickets() throws SQLException {
         Statement stmt = connection.createStatement();
         ResultSet resultSet = stmt.executeQuery("SELECT * FROM tickets");
         List<String> ticketsList = new ArrayList<>();
 
+        //while there are values, get them and store them as strings
         while (resultSet.next()) {
             String ticket_details = resultSet.getString("ticket_details");
             String dateCreated = resultSet.getString("ticket_date");
@@ -145,6 +181,7 @@ public class DBConnect {
         return ticketsList;
     }
 
+    //Used for the edit and delete of the tickets
     public static List<String> loadTicketsEditOrDelete() throws SQLException {
         Statement stmt = connection.createStatement();
         ResultSet resultSet = stmt.executeQuery("SELECT * FROM tickets");
@@ -157,11 +194,14 @@ public class DBConnect {
         return ticketsList;
     }
 
+    //used to insert the users input as a new ticket
     public static void insertTicket(String text) {
-        //insert into query
+        //Creates a date and time object for the new ticket
         String ticketDate = dateTime.justDate();
         String ticketTime = dateTime.justTime();
         String postedBy = "Skate Hire App";
+
+        //tries to insert the above as a new tickets
         try {
             Statement stmt = connection.createStatement();
             PreparedStatement pstmt = connection.prepareStatement(
@@ -171,16 +211,15 @@ public class DBConnect {
             pstmt.setString(2, ticketTime);
             pstmt.setString(3, text);
             pstmt.setString(4, postedBy);
-
             pstmt.executeUpdate();
-
+            //developer print statement to confirm ticket creation
             System.out.println("Inserted Into Database");
 
         } catch (SQLException e) {
             log.log(Level.SEVERE,"Announcement not inserted", e);
         }
     }
-
+    //removes the ticket where the details match the value recieved from the parent class
     public static boolean deleteTicket(String value) {
         boolean success;
         try {
@@ -196,26 +235,35 @@ public class DBConnect {
         return success;
     }
 
+    //used to fetch all the maintenance records currently stored
     public static List<String> loadMaintenance() throws SQLException {
         Statement stmt = connection.createStatement();
         ResultSet resultSet = stmt.executeQuery("SELECT * FROM maintenance");
         List<String> maintenanceList = new ArrayList<>();
 
+        //while there are values, get them and store them as strings
         while (resultSet.next()) {
             String record = resultSet.getString("maintenance_details");
             String type = resultSet.getString("maintenance_type");
             String skateSize = resultSet.getString("skateSize");
 
+            //If there is no skate size variable, then set the display as N/A for the list view
             if((skateSize == null) || (skateSize.equals("null"))){
                 skateSize = "N/A";
             }
+            //Sets all these values in a layout for each row in a list view
             maintenanceList.add(
                     "Details: " + record + "\nType: " + type + "\nSkate Size: " +skateSize);
         }
         return maintenanceList;
     }
 
+    //Inserts the user input into the maintenance database
+    //Receives type, details of issues, and the skate size
     public static void insertMaintenance(String typeIn, String details, String skateSizeIn) {
+        //Trying to connect to the database
+        //If connected, query is executed and values are inserted
+        //If successful statement is printed to the console
         try {
             Statement stmt = connection.createStatement();
             String sql = "INSERT INTO maintenance(maintenance_type, maintenance_details, skateSize)" +
@@ -223,6 +271,9 @@ public class DBConnect {
             stmt.executeUpdate(sql);
             System.out.println("Inserted Into Database");
 
+            //if a skate size is entered, skate sizes are fetched
+            //Amount of inventory and current is reduced by 1 so data tables match
+            //New value is passed and skate records are updated so pair cannot be hired out
             if (skateSizeIn != null) {
                 int currentAmount = fetchSkateSizeCurrent(skateSizeIn);
                 int newAmount = currentAmount - 1;
@@ -237,6 +288,7 @@ public class DBConnect {
         }
     }
 
+    //Used to set the skates to a new value, receives the value and size from parent call
     public static void updateSkateSizeAmount(String skateSize, int newAmount) {
         try {
             Statement stmt = connection.createStatement();
@@ -246,7 +298,8 @@ public class DBConnect {
             log.log(Level.SEVERE,"Skate inventory not updated", e);
         }
     }
-
+    //Updates to the skate inventory value, very similar to previous function
+    //on a code review could be merged together by adding a table name value and having one function.
     public static void updateSkateInventory(String skateSize, int newAmount) {
         try {
             Statement stmt = connection.createStatement();
@@ -256,7 +309,7 @@ public class DBConnect {
             log.log(Level.SEVERE,"Skate inventory not updated", e);
         }
     }
-
+    //Used to fetch the amount of skates for a certain size from the current skates table
     public static int fetchSkateSizeCurrent(String skateSize) {
         int value = 0;
         String query = "SELECT skateAmount FROM skate_inventory WHERE skateSize = ?";
@@ -275,6 +328,8 @@ public class DBConnect {
         return value;
     }
 
+    //Used to fetch the amount of skates for a size inputted by the parent function
+    //retrieves only the amount for that specific skate size
     public static int fetchSkateSizeAmount(String skateSize) {
         int value = 0;
         String query = "SELECT skateAmount FROM current_skates WHERE skateSize = '" + skateSize + "'";
@@ -292,12 +347,15 @@ public class DBConnect {
         return value;
     }
 
+    //Used to check if there is a current session in place
     public static boolean checkForSessionStart() throws SQLException {
         String query = "SELECT * FROM current_session";
         Statement stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);
         return rs.next();
     }
+    //Gets the session start time, uses the one saved to the current session rather than creating new
+    //Prevents app incompatibility issues by ensuring the start time is consistent.
     public static String getSessionStartTime() {
         String query = "SELECT current_dateTime FROM current_session";
         try (Statement stmt = connection.createStatement();
@@ -312,12 +370,14 @@ public class DBConnect {
         }
     }
 
+    //Generic function that adds any extra purchase to the relevant database for analytics
     public static void addExtraPurchase(Double purchaseCost) throws SQLException {
         //fetch current session
         String currentSessionQuery = "SELECT * FROM current_session";
         Statement selectStmt = connection.createStatement();
         ResultSet rs = selectStmt.executeQuery(currentSessionQuery);
 
+        //default sets
         int extrasSoldAmountFetch = 0;
         double extrasSoldTotalFetch =0.00;
         String currentSession = " ";
@@ -328,19 +388,23 @@ public class DBConnect {
             extrasSoldTotalFetch = rs.getDouble("Current_Extras_sold_total");
         }
 
+        //adding an extra to the sales, based on the type passed by the user
+        //Also adds the price to the total costs
         int extrasSoldAmount = extrasSoldAmountFetch + 1;
         double extrasSoldTotal = extrasSoldTotalFetch + purchaseCost;
 
+        //updates the current database with the new values
         String updateQuery = "UPDATE current_session SET Current_Extras_sold_amount = ?, " +
                 "Current_Extras_sold_total = ? WHERE current_dateTime = ?";
         PreparedStatement updateStmt = connection.prepareStatement(updateQuery);
         updateStmt.setInt(1, extrasSoldAmount);
         updateStmt.setDouble(2, extrasSoldTotal);
         updateStmt.setString(3, currentSession);
-
         updateStmt.executeUpdate();
     }
 
+    //Adds all transactions into the transaction history table
+    //Used by the Business Management System
     public static void addTransaction(String session, String type, String time, Double value) throws SQLException {
         System.out.println("Transaction Added Test");
         Statement stmt = connection.createStatement();

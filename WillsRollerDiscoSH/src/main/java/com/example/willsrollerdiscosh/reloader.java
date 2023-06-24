@@ -21,7 +21,14 @@ import java.sql.SQLException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/*Resources Used:
+ * Reloaders:
+ * Run Laters:  */
+
+//Used to Reload all the list views, most methods follow the same layout
+//Run laters are used due to JavaFX issues when trying to run all at the same time
 public class reloader {
+    //Skate Hire
     public static void SkateHireReloader(Scene scene) {
         Timer reloadSkateHire = new Timer();
         reloadSkateHire.schedule(new TimerTask() {
@@ -29,75 +36,81 @@ public class reloader {
             public void run() {
                 Platform.runLater(() -> {
                     try {
+                        //Linking the ListView to the Scene
                         ListView<Skate> lv = (ListView<Skate>) scene.lookup("#SHListView");
                         if (lv != null) {
+                            //If the list view is on the scene, then load the ListView contents
                             listViews.loadSkateHireListView(lv);
-                            System.out.println("Skate Hire Reload");
                         }
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
                 });
             }
-        }, 0, 800);
+        }, 0, 800); // reload every 0.8 Seconds
 
     }
+    //Session start reloader
     public static void sessionStartReloader() {
         Timer reloadSkateHire = new Timer();
         reloadSkateHire.schedule(new TimerTask() {
             @Override
             public void run() {
                 Platform.runLater(() -> {
-                    System.out.println("Session Start Reload");
+                    //Continuous checks of whether a session is ongoing
                     sceneSelector.sessionStatus();
                 });
             }
-        }, 0, 800); // reload every second
+        }, 0, 800); // reload every 0.8 Seconds
 
     }
-
+    //Tickets
     public static void TicketsReloader(Scene scene) {
         Timer reloadTickets = new Timer();
         reloadTickets.schedule(new TimerTask() {
             @Override
             public void run() {
                 Platform.runLater(() -> {
+                    //Linking the ListView to the Scene
                     ListView<Skate> lv = (ListView<Skate>) scene.lookup("#CTListView");
                     if (lv != null) {
                         try {
+                            //If the list view is on the scene, then load the ListView contents
                             listViews.loadTicketsListView(lv);
                         } catch (SQLException e) {
                             throw new RuntimeException(e);
                         }
-                        System.out.println("Ticket Reload");
                     }
                 });
             }
-        }, 0, 800);
+        }, 0, 800); // reload every 0.8 Seconds
 
     }
 
+    //Edit or Delete Tickets Reloader
     public static void EditOrDeleteTicketsReloader(Scene scene) {
         Timer reloadTickets = new Timer();
         reloadTickets.schedule(new TimerTask() {
             @Override
             public void run() {
                 Platform.runLater(() -> {
+                    //Linking the ListView to the Scene
                     ListView<String> lv = (ListView<String>) scene.lookup("#CTListViewEditOrDelete");
                     if (lv != null) {
                         try {
+                            //If the list view is on the scene, then load the ListView contents
                             listViews.loadTicketEditOrDeleteListView(lv);
                         } catch (SQLException e) {
                             throw new RuntimeException(e);
                         }
-                        System.out.println("Ticket Reload");
                     }
                 });
             }
-        }, 0, 800);
+        }, 0, 800); // reload every 0.8 Seconds
 
     }
 
+    //Maintenance
     public static void maintenanceReloader(Scene scene) {
         Timer maintenanceTimer = new Timer();
         maintenanceTimer.schedule(new TimerTask() {
@@ -105,10 +118,11 @@ public class reloader {
             public void run() {
                 Platform.runLater(() -> {
                     try {
+                        //Linking the ListView to the Scene
                         ListView<Skate> lv = (ListView<Skate>) scene.lookup("#MListView");
                         if (lv != null) {
+                            //If the list view is on the scene, then load the ListView contents
                             listViews.loadMaintenanceListView(lv);
-                            System.out.println("Maintenance Reload");
                         }
                     } catch (SQLException e) {
                         throw new RuntimeException(e);

@@ -18,14 +18,25 @@ package com.example.willsrollerdiscosh;
 import java.sql.*;
 
 public class locks {
-    String url = "jdbc:mysql://localhost:3306/wrdDatabase";
+    /******************************************************
+     Local Testing Database Connections
+
+     String url = "jdbc:mysql://localhost:3306/wrdDatabase";
+     String username = "root";
+     String password = "root";
+     ********************************************************/
+
+    /*Docker Database Connections
+     * Using Local host currently due to firewall issues with University Connections*/
+    String url = "jdbc:mysql://localhost:3307/wrddatabase";
+    //String url = "jdbc:mysql://172.17.0.2:3307/wrddatabase";
     String username = "root";
-    String password = "root";
-
+    String password = "my-secret-pw";
     static Connection connection = null;
-
     static ResultSet rs;
 
+    //Duplicate code from DBConnect, used to establish a database connection for the locks
+    //Could be refactored and removed on refinement
     public void connect() {
         {
             try {
@@ -47,6 +58,8 @@ public class locks {
         }
     }
 
+    //Used to lock the database
+    //Stops concurrency issues by making transactions wait for resources to be out of use
     public static void lock(String resourceName, String lockedBy) throws SQLException {
         String query = "UPDATE locks SET lockedBy = ?, lockTime = NOW() WHERE resourceName = ? AND lockedBy IS NULL";
 
@@ -60,7 +73,8 @@ public class locks {
             throw new SQLException("Failed to acquire lock for resource: " + resourceName);
         }
     }
-
+    //When a transaction is finished, unlock is called and the locked resource is set to null so other
+    //transactions can be completed on the same database table
     public static void unlock(String resourceName, String lockedBy) throws SQLException {
         String query = "UPDATE locks SET lockedBy = NULL, lockTime = NULL WHERE resourceName = ? AND lockedBy = ?";
 
