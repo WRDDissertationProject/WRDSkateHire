@@ -18,7 +18,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 
 /*Resources Used:
- * Alerts:  */
+ * Alerts:
+ * andrew1234 (2021) JavaFX | Alert with Examples. GeeksForGeeks [Online]. Available From:
+ * https://www.geeksforgeeks.org/javafx-alert-with-examples/ [Accessed 08/02/2023].
+ *  */
 public class warnings {
     //Tells the user that they cannot return anymore of that skate size as they have reached the same
     //value as the starting value
